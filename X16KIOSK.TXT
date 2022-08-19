@@ -14,7 +14,7 @@
 # 1. PROGRAM DISPLAY NAME              TAKE TO THE SKIES! 
 # 2. SHORT DESCRIPTION                 ADVENTURE GAME DEMO 
 # 3. AUTHOR                            BY JESTIN 
-# 4. PROGRAM FOLDER                    //TAKE-TO-THE-SKIES 
+# 4. PROGRAM FOLDER                    //:TAKE-TO-THE-SKIES 
 # 5. FILE NAME                         AIRSHIP.PRG 
 #
 # THE TOTAL LENGTH OF THE FIVE LINES, INCLUDING END OF LINE MARKERS, MAY
