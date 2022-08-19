@@ -1,0 +1,38 @@
+# ----------------------------------------------------------------------------- 
+# CONFIG FILE FOR X16 KIOSK MENU 
+# ------------------------------ 
+# LINES BEGINNING WITH # ARE IGNORED AND MAY BE USED FOR COMMENTS. 
+#
+# EMPTY LINES ARE IGNORED TOO.
+#
+# LINE BREAKS SHOULD BE MARKED WITH A SINGLE LF OR CR. AS EMPTY 
+# LINES ARE IGNORED, CRLF MAY ALSO WORK.
+#
+# EACH MENY ENTRY IS DEFINED BY EXACTLY FIVE LINES IN THE FOLLOWING ORDER: 
+#
+# NO CONTENT                           EXAMPLE 
+# 1. PROGRAM DISPLAY NAME              TAKE TO THE SKIES! 
+# 2. SHORT DESCRIPTION                 ADVENTURE GAME DEMO 
+# 3. AUTHOR                            BY JESTIN 
+# 4. PROGRAM FOLDER                    //TAKE-TO-THE-SKIES 
+# 5. FILE NAME                         AIRSHIP.PRG 
+#
+# THE TOTAL LENGTH OF THE FIVE LINES, INCLUDING END OF LINE MARKERS, MAY
+# NOT EXCEED 256 CHARACTERS.
+# 
+# THE LAST LINE MUST BE TERMINATED BY A LINE BREAK.
+# -----------------------------------------------------------------------------
+
+#1
+TAKE TO THE SKIES!
+ADVENTURE GAME DEMO
+BY JESTIN
+//:TAKE-TO-THE-SKIES
+AIRSHIP.PRG
+
+#2
+TEST
+TESTING
+BY NO ONE
+//:
+TEST.PRG

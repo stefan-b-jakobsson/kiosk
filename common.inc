@@ -1,0 +1,20 @@
+SETNAM = $ffbd
+SETLFS = $ffba
+OPEN   = $ffc0
+CLOSE  = $ffc3
+LOAD   = $ffd5
+CHRIN  = $ffcf
+CHKIN  = $ffc6
+CLRCHN = $ffcc 
+READST = $ffb7
+SCNKEY = $ff9f
+GETIN  = $ffe4
+KBDBUF_PUT = $fec3
+MOUSE_CONFIG = $ff68
+MOUSE_GET = $ff6b
+
+VERA_ADDRL = $9f20
+VERA_ADDRM = $9f21
+VERA_ADDRH = $9f22
+VERA_DAT   = $9f23
+VERA_ISR   = $9f27
