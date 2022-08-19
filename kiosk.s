@@ -37,6 +37,10 @@ main:
     lda exitflag
     beq :-
 
+    ;Disable mouse
+    lda #0
+    jsr MOUSE_CONFIG
+
     ;Exit to basic
     rts
 

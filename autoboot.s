@@ -10,7 +10,7 @@ init:
 :   lda starter,x
     sta $0400,x
     inx
-    cpx starter_end-starter
+    cpx #starter_end-starter
     bne :-
     
     ldx #0
