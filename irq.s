@@ -31,6 +31,24 @@
 .endproc
 
 ;------------------------------------------------------------------------------
+; Function......: irq_reset
+; Purpose.......: Resets IRQ handler to default value
+; Input.........: None
+; Output........: None
+;------------------------------------------------------------------------------
+.proc irq_reset
+    sei
+
+    lda irq_default
+    sta $0314
+    lda irq_default+1
+    sta $0315
+
+    cli
+    rts
+.endproc
+
+;------------------------------------------------------------------------------
 ; Function......: irq_handler
 ; Purpose.......: Custom IRQ handler
 ; Input.........: None
