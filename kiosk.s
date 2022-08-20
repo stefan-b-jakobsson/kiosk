@@ -37,6 +37,9 @@ main:
     lda exitflag
     beq :-
 
+    ;Reset IRQ handler
+    jsr irq_reset
+
     ;Disable mouse
     lda #0
     jsr MOUSE_CONFIG
