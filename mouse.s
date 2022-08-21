@@ -11,17 +11,13 @@
     jsr MOUSE_GET
     sta button_state
 
-    ;Convert x/y coordinates to program item number
+    ;Convert x/y coordinates to program index
     stz index
 
-    ldx #3              ;Mouse X/8
+    ldx #3              ;Mouse X/8 and Mouse Y/8
 :   lsr $25
     ror $24
-    dex
-    bne :-
-
-    ldx #3              ;Mouse Y/8
-:   lsr $27
+    lsr $27
     ror $26
     dex
     bne :-
@@ -30,9 +26,9 @@
     cmp #5              ;Mouse left of all items
     bcc mouse_out
     cmp #35
-    bcc check_y         ;Mouse may be over items in the left column
+    bcc check_y         ;Mouse may be hovering over items in the left column
     cmp #45
-    bcc mouse_out       ;Mouse is in between items
+    bcc mouse_out       ;Mouse is in between left and right column of items
     cmp #75
     bcs mouse_out       ;Mouse is to the right of all items
 
@@ -40,18 +36,16 @@
     sta index
 
 check_y:
-    lda $26
-    cmp #20
-    bcc mouse_out       ;Mouse is above all items
-
     sec
+    lda $26
     sbc #20
+    bcc mouse_out       ;Mouse is above all items
 
     and #%00000011
     cmp #%00000011
     beq mouse_out       ;Mouse is at empty line between items
 
-    sec                 ;Calculate index           
+    sec                 ;Calculate index
     lda $26
     and #%11111100
     sbc #20
@@ -61,9 +55,7 @@ check_y:
     sta index
 
 check_available:
-    ina
     cmp file_appcount
-    beq mouse_over
     bcs mouse_out
 
 mouse_over:
@@ -72,12 +64,12 @@ mouse_over:
     beq :+
 
     ldy #0                      ;Reset previously hovered item
-    jsr screen_item_on_mouse
+    jsr screen_set_item_color
 
 :   ldx index
     stx mouse_over_item
     ldy #1
-    jsr screen_item_on_mouse    ;Change color indicating we're hovering over item
+    jsr screen_set_item_color    ;Change color indicating we're hovering over item
 
 check_button:
     lda button_state
@@ -94,7 +86,7 @@ mouse_out:
     beq :+
 
     ldy #0                      ;Reset previously hovered item
-    jsr screen_item_on_mouse
+    jsr screen_set_item_color
     lda #$ff
     sta mouse_over_item
 

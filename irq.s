@@ -58,7 +58,6 @@
     lda $9f27
     and #%00000001
     beq :+
-    lda #%00000001
     sta irq_vblank
 :   jmp (irq_default)
 .endproc

@@ -14,19 +14,13 @@
     bcs exit
 
     ;Convert to program index, A being index 0
-    cmp #65
-    bcc exit            ;keycode<65, exit
-
     sec
     sbc #65
-    tax
-    
-    ina
     cmp file_appcount   ;check if index+1 <= program count
-    beq run
     bcs exit
 
 run:
+    tax
     jsr file_run
 
 exit:

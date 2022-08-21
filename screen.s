@@ -43,11 +43,11 @@ next_x16logo:
     sta VERA_ADDRH
 
     ldx #7  ;7 lines to print
-    ldy #0
     lda #<vcfmw17
     sta $22
     lda #>vcfmw17
     sta $23
+    ldy #0
 print_vcfmw17:
     lda ($22),y
     beq next_vcfmw17
@@ -97,29 +97,29 @@ vcfmw17:
 ; Output........: None
 ;------------------------------------------------------------------------------
 .proc screen_scroll
-    stz VERA_ADDRL
-    lda #$b0+1
-    sta VERA_ADDRM
-    lda #%00000001
-    sta VERA_ADDRH
+    stz VERA_ADDRL      ;4
+    lda #$b0+1          ;2
+    sta VERA_ADDRM      ;4
+    lda #%00000001      ;2
+    sta VERA_ADDRH      ;4
 
-    ldx #160
+    ldx #160            ;2
 loop:
-    lda VERA_DAT
-    dec VERA_ADDRM
-    sta VERA_DAT
-    inc VERA_ADDRM
+    lda VERA_DAT        ;4
+    dec VERA_ADDRM      ;6
+    sta VERA_DAT        ;4
+    inc VERA_ADDRM      ;6
     
-    inc VERA_ADDRL
-    dex
+    inc VERA_ADDRL      ;6
+    dex                 ;2
     bne loop
 
-    inc VERA_ADDRM
-    lda VERA_ADDRM
-    cmp #$b0+34
-    beq :+
-    stz VERA_ADDRL
-    bra loop
+    inc VERA_ADDRM      ;6
+    lda VERA_ADDRM      ;4
+    cmp #$b0+34         ;2
+    beq :+              ;2
+    stz VERA_ADDRL      ;4
+    bra loop            ;3 = 49 cycles x 160 = 7,840 cycles = 980 us @ 8 MHz 
 
 :   rts
 .endproc
@@ -173,8 +173,7 @@ right:
 
 row:
     txa
-    lsr
-    asl
+    and #%11111110
     asl
     clc
     adc #$b0+20
@@ -246,16 +245,14 @@ println:
 ;x=item
 ;y: 1 = over, 1 = out
 ;------------------------------------------------------------------------------
-; Function......: screen_item_on_mouse
+; Function......: screen_set_item_color
 ; Purpose.......: Changes color of vertical band at left side of item
-;                 depending on whether the mouse is hovering over it
-;                 or not
 ; Input.........: X = program index
-;                 Y : 0 = mouse out
-;                     1 = mouse over
+;                 Y : 0 = set color for mouse not hovering
+;                     1 = set color for mouse hovering
 ; Output........: None
 ;------------------------------------------------------------------------------
-.proc screen_item_on_mouse
+.proc screen_set_item_color
     txa
     and #%00000001
     beq left
@@ -340,8 +337,8 @@ set_color:
     sbc #64
     rts
 
-:   sbc #255
-    bne :+
+:   cmp #255
+    beq :+
     sec
     sbc #128
     rts
