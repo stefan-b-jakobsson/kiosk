@@ -8,7 +8,7 @@ main:
     stz file_appcount           ;Number of programs
     stz exitflag                ;0=continue running
     lda #$ff                    ;ff=mouse isn't over any item
-    sta mouse_over_item
+    sta mouse_cur_index
     jsr screen_init             ;Print greeting
     jsr irq_init                ;Init IRQ, used for VBLANK
 
@@ -30,10 +30,14 @@ main:
     lda #1
     jsr MOUSE_CONFIG
 
+    ;Init joystick
+    jsr joystick_init
+
     ;Main loop
 :   jsr irq_wait_vblank
     jsr kb_scan
     jsr mouse_scan
+    jsr joystick_scan
     lda exitflag
     beq :-
 
@@ -57,3 +61,4 @@ main:
 .include "file.s"
 .include "kb.s"
 .include "mouse.s"
+.include "joystick.s"
