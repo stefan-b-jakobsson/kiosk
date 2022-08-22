@@ -56,12 +56,18 @@ configfile:
     stz field
     stz index_in
     stz index_out
+    stz st
 
 readln:
+    lda st
+    bne eof
+    
     jsr CHRIN
     sta char
     jsr READST
-    bne eof
+    sta st
+    and #255-64
+    bne eof         ;Other problem than EOF marker
     lda char
     cmp #10         ;LF
     beq eol
@@ -117,6 +123,7 @@ eof:
     index_in: .res 1
     index_out: .res 1
     field: .res 1
+    st: .res 1
 .CODE
 .endproc
 
