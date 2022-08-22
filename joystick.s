@@ -115,6 +115,9 @@ left:
     beq :+
     ldy #0
     jsr screen_set_item_color
+    bra :++
+
+:   stz joystick_cur_index
 
 :   dec joystick_cur_index
     ldx joystick_cur_index
