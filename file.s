@@ -88,6 +88,15 @@ eol:
     stz index_in
     bra readln                  ;Skip line starting with #
 
+:   cmp #'*'
+    bne :++
+    lda file_hiddencount
+    cmp #$ff
+    bne :+
+    inc file_hiddencount
+:   stz index_in
+    bra readln
+
 :   ldy #0                      ;Copy field to app info buffer
     ldx index_out
 :   lda file_buffer,y
@@ -232,6 +241,12 @@ run:
     lda #0
     jsr CLOSE
 
+    ;Clear keyboard buffer
+    sei
+:   jsr GETIN
+    bne :-
+
+    ;Insert RUN<CR> into keyboard buffer
     lda #'r'
     jsr KBDBUF_PUT
     lda #'u'
@@ -240,6 +255,8 @@ run:
     jsr KBDBUF_PUT
     lda #13
     jsr KBDBUF_PUT
+    
+    cli
     
     inc exitflag            ;Set exitflag to exit from main loop
     
@@ -254,4 +271,5 @@ run:
     file_cur_app: .res 256
     file_buffer: .res 256
     file_appcount: .res 1
+    file_hiddencount: .res 1
 .CODE

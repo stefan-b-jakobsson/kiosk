@@ -135,14 +135,21 @@ loop:
     jsr file_open_config
 
 :   jsr file_get_appinfo
-    bcs :+
-    bne :+
-    ldx file_appcount
-    jsr screen_print_appinfo
-    inc file_appcount
+    bcs eof
+
+    ldx file_hiddencount
+    cpx #$ff
+    beq :+
+    inc file_hiddencount
     bra :-
 
-:   jsr file_close_config
+:   ldx file_appcount
+    jsr screen_print_appinfo
+    inc file_appcount
+    bra :--
+
+eof:
+    jsr file_close_config
     rts
 .endproc
 

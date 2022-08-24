@@ -5,7 +5,10 @@
 
 main:
     ;Setup
+    stz kb_prevkey
     stz file_appcount           ;Number of programs
+    lda #$ff
+    sta file_hiddencount        ;Number of hidden programs
     stz exitflag                ;0=continue running
     lda #$ff                    ;ff=mouse isn't over any item
     sta mouse_cur_index
