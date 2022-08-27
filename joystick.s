@@ -8,6 +8,7 @@
     ;Set values
     lda #$ff
     sta joystick_cur_index
+    sta joystick_old_index
     sta joystick_old_state
     sta joystick_old_state+1
 
@@ -42,7 +43,7 @@ no_joystick:
     jsr JOYSTICK_GET
     cpy #$00
     beq :+
-    jmp joystick_init       ;Previously found joystick no longer responds; could this happen?
+;   jmp joystick_init       ;Previously found joystick no longer responds; could this happen?
     
 :   sta joystick_new_state
     txa
@@ -84,22 +85,30 @@ right:
 
 :   jsr mouse_unselect
 
-    ldx joystick_cur_index
-    cpx #$ff
-    beq :+
-    ldy #0
-    jsr screen_set_item_color
-    
-:   inc joystick_cur_index
-    ldx joystick_cur_index
-    cpx file_appcount
-    bcc :+
-    stz joystick_cur_index
+    lda joystick_cur_index
+    cmp #$ff
+    bne :+
     ldx #0
-
-:   ldy #1
+    stx joystick_cur_index
+    ldy #1
     jsr screen_set_item_color
     jmp update_old_state
+
+:   ora #%00000001
+    cmp file_appcount
+    bcs :+
+
+    pha
+    ldx joystick_cur_index
+    ldy #0
+    jsr screen_set_item_color
+
+    plx
+    stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
+
+:   jmp update_old_state
 
 left:
     lda joystick_new_state
@@ -111,23 +120,22 @@ left:
 :   jsr mouse_unselect
 
     ldx joystick_cur_index
-    cpx #$ff
-    beq :+
-    ldy #0
-    jsr screen_set_item_color
-    bra :++
-
-:   stz joystick_cur_index
-
-:   dec joystick_cur_index
-    ldx joystick_cur_index
-    cpx #$ff
+    cmp #$ff
     bne :+
-    ldx file_appcount
-    dex
+    ldx #0
     stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
+    jmp update_old_state
 
-:   ldy #1
+:   ldy #0
+    jsr screen_set_item_color
+
+    lda joystick_cur_index
+    and #%11111110
+    sta joystick_cur_index
+    tax
+    ldy #1
     jsr screen_set_item_color
     jmp update_old_state
 
@@ -139,30 +147,31 @@ down:
 
     jsr mouse_unselect
 
-    ldx joystick_cur_index
-    cpx #$ff
+    lda joystick_cur_index
+    cmp #$ff
     bne :+
     ldx #0
-    bra :++
-
-:   ldy #0
-    jsr screen_set_item_color
-
-:   inx
-    cpx file_appcount
-    bcc :+
-    ldx #0
-    bra :++
-
-:   inx
-    cpx file_appcount
-    bcc :+
-    dex
-
-:   stx joystick_cur_index
+    stx joystick_cur_index
     ldy #1
     jsr screen_set_item_color
     jmp update_old_state
+
+:   clc
+    adc #2
+    cmp file_appcount
+    bcs :+
+    
+    pha
+    ldx joystick_cur_index
+    ldy #0
+    jsr screen_set_item_color
+    
+    plx
+    stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
+
+:   jmp update_old_state
 
 up:
     lda joystick_new_state
@@ -172,31 +181,30 @@ up:
 
     jsr mouse_unselect
 
-    ldx joystick_cur_index
-    cpx #$ff
+    lda joystick_cur_index
+    cmp #$ff
     bne :+
     ldx #0
-    bra :+++
-
-:   ldy #0
-    jsr screen_set_item_color
-
-    dex
-    cpx #$ff
-    bne :+
-    ldx file_appcount
-    dex
-    bra :++
-
-:   dex
-    cpx #$ff
-    bne :+
-    ldx #0
-
-:   stx joystick_cur_index
+    stx joystick_cur_index
     ldy #1
     jsr screen_set_item_color
     jmp update_old_state
+
+:   sec
+    sbc #2
+    bcc :+
+    
+    pha
+    ldx joystick_cur_index
+    ldy #0
+    jsr screen_set_item_color
+    
+    plx
+    stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
+
+:   jmp update_old_state
 
 a_pressed:
     ldx joystick_cur_index
@@ -217,6 +225,7 @@ update_old_state:
     joystick_new_state: .res 2
 .CODE
 .endproc
+
 ;------------------------------------------------------------------------------
 ; Function......: joystick_unselect
 ; Purpose.......: Unselects an item previously selected by the joystick
@@ -227,6 +236,7 @@ update_old_state:
     ldx joystick_cur_index
     cpx #$ff
     beq :+
+    stx joystick_old_index
     ldy #0
     jsr screen_set_item_color
     ldx #$ff
@@ -234,8 +244,28 @@ update_old_state:
 :   rts
 .endproc
 
+;------------------------------------------------------------------------------
+; Function......: joystick_reselect
+; Purpose.......: Selects an item previously unslected by joystick_unselect
+; Input.........: None
+; Output........: None
+;------------------------------------------------------------------------------
+.proc joystick_reselect
+    ldx joystick_old_index
+    cpx #$ff
+    beq :+
+    stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
+    
+    ldx #$ff
+    stx joystick_old_index              ;Clear old index
+:   rts
+.endproc
+
 .segment "GOLDENRAM"
     joystick_device: .res 1
     joystick_cur_index: .res 1
+    joystick_old_index: .res 1
     joystick_old_state: .res 2
 .CODE

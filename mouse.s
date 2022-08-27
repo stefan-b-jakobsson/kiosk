@@ -22,16 +22,14 @@
 
     lda button_state
     bne :+
-    rts
+    jmp not_hover_timer
 
-    ldx #0
+:   ldx #0
 :   lda $24,x
     sta mouse_old_state,x
     inx
     cpx #5
     bne :-
-
-    jsr joystick_unselect
 
     ;Convert x/y coordinates to program index
     stz new_index
@@ -81,6 +79,8 @@ check_available:
     bcs mouse_out
 
 mouse_over:
+    jsr joystick_unselect
+
     ldx mouse_cur_index
     cpx #$ff
     beq :+
@@ -100,19 +100,33 @@ check_button:
     ldx new_index
     jsr file_run
 
-:   rts
+:   stz mouse_not_hover_count
+    rts
 
 mouse_out:
     ldx mouse_cur_index
     cpx #$ff
-    beq :+
+    beq not_hover_timer
 
     ldy #0                      ;Reset previously hovered item
     jsr screen_set_item_color
     lda #$ff
     sta mouse_cur_index
 
-:   rts
+not_hover_timer:
+    lda mouse_cur_index
+    cmp #$ff
+    beq :+
+    rts
+
+:   lda mouse_not_hover_count
+    cmp #30
+    bcc :+
+    jsr joystick_reselect
+
+:   inc mouse_not_hover_count
+    rts
+
 
 .segment "GOLDENRAM"
     new_index: .res 1
@@ -140,4 +154,5 @@ mouse_out:
 .segment "GOLDENRAM"
     mouse_cur_index: .res 1
     mouse_old_state: .res 5
+    mouse_not_hover_count: .res 1
 .CODE

@@ -12,8 +12,15 @@ main:
     stz exitflag                ;0=continue running
     lda #$ff                    ;ff=mouse isn't over any item
     sta mouse_cur_index
+    stz mouse_not_hover_count
     jsr screen_init             ;Print greeting
     jsr irq_init                ;Init IRQ, used for VBLANK
+
+    ;Wait 2.5 seconds
+    ldx #150
+:   jsr irq_wait_vblank
+    dex
+    bne :-
 
     ;Greetings are displayed at middle of screen, scroll upward once per VBLANK
     ldx #21
@@ -35,6 +42,14 @@ main:
 
     ;Init joystick
     jsr joystick_init
+
+    ;Select first item on startup, if available
+    ldx #0
+    cpx file_appcount
+    beq :+
+    stx joystick_cur_index
+    ldy #1
+    jsr screen_set_item_color
 
     ;Main loop
 :   jsr irq_wait_vblank
