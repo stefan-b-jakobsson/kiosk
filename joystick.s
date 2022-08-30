@@ -41,11 +41,8 @@ no_joystick:
 .proc joystick_scan
     lda joystick_device
     jsr JOYSTICK_GET
-    cpy #$00
-    beq :+
-;   jmp joystick_init       ;Previously found joystick no longer responds; could this happen?
     
-:   sta joystick_new_state
+    sta joystick_new_state
     txa
     sta joystick_new_state+1
 
@@ -143,9 +140,10 @@ down:
     lda joystick_new_state
     ora joystick_old_state
     and #%00000100
-    beq update_old_state
+    bne :+
+    jmp update_old_state
 
-    jsr mouse_unselect
+:   jsr mouse_unselect
 
     lda joystick_cur_index
     cmp #$ff

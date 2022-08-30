@@ -5,12 +5,15 @@
 ; Output........: None
 ;------------------------------------------------------------------------------
 .proc screen_init
+    lda #$ff
+    sta screen_header_flash_row
+    
     ;Clear screen
     lda #147
     jsr $ffd2
 
     ;Print X16 logo
-    lda #20
+    lda #10
     sta VERA_ADDRL
     lda #$b0+26
     sta VERA_ADDRM
@@ -28,32 +31,38 @@ print_x16logo:
 
 next_x16logo:
     iny
-    lda #20
+    lda #10
     sta VERA_ADDRL
     inc VERA_ADDRM
     dex
     bne print_x16logo
 
     ;Print VCF MW17
-    lda #42
+    lda #32                         ;Column 16
     sta VERA_ADDRL
-    lda #$b0+26
+    lda #$b0+26                     ;Line 26
     sta VERA_ADDRM
-    lda #%00100001
+    lda #%00010001                  ;Auto-increment 1
     sta VERA_ADDRH
 
-    ldx #7  ;7 lines to print
+    ldx #7                          ;7 lines to print
     lda #<vcfmw17
     sta $22
     lda #>vcfmw17
     sta $23
     ldy #0
 print_vcfmw17:
-    lda ($22),y
+    lda ($22),y                     ;Get pixel data
     beq next_vcfmw17
+    pha
+    lda #81                         ;PETSCII - filled circle
+    sta VERA_DAT
+    pla
     cmp #'x'
     bne :+
-    lda #81
+    lda #97                         ;White foreground, blue background (active)
+    bra :++
+:   lda #96+11                      ;Dark grey foreground, blue background (inactive)
 :   sta VERA_DAT
     iny
     bne print_vcfmw17
@@ -62,12 +71,12 @@ print_vcfmw17:
 
 next_vcfmw17:
     iny
-    lda #42
+    lda #32                         ;Column 16
     sta VERA_ADDRL
-    inc VERA_ADDRM
-    dex
+    inc VERA_ADDRM                  ;Next row
+    dex                             ;Decrease line counter, exit if 0
     bne print_vcfmw17
-    
+
     rts
 
 x16logo:
@@ -80,13 +89,13 @@ x16logo:
     .byt 118, 98, 105, 98, 32, 98, 32, 98, 32, 98, 95, 98, 117, 98, 0
 
 vcfmw17:
-    .byt " xxx     x   x  xxx  xxxx   x    x x    x  x xxxx",0
-    .byt "x   x    x   x x   x x      xx  xx x    x xx    x",0
-    .byt "x x x    x   x x     x      x xx x x    x  x    x",0
-    .byt "x xxx    x   x x     xxx    x xx x x    x  x   x ",0 
-    .byt "x        x   x x     x      x    x x xx x  x   x ",0
-    .byt "x   x     x x  x   x x      x    x x xx x  x   x ",0
-    .byt " xxx       x    xxx  x      x    x  x  x  xxx  x ",0
+    .byt " xxx     x   x  xxx  xxxx   x    x x    x  x xxxx    ",0
+    .byt "x   x    x   x x   x x      xx  xx x    x xx    x    ",0
+    .byt "x x x    x   x x     x      x xx x x    x  x    x    ",0
+    .byt "x xxx    x   x x     xxx    x xx x x    x  x   x     ",0 
+    .byt "x        x   x x     x      x    x x xx x  x   x     ",0
+    .byt "x   x     x x  x   x x      x    x x xx x  x   x     ",0
+    .byt " xxx       x    xxx  x      x    x  x  x  xxx  x     ",0
 
 .endproc
 
@@ -204,7 +213,7 @@ println:
     lda #%00000001
     sta VERA_ADDRH
     
-    lda #80                 ;Default color setting
+    lda #91                 ;Default color setting
     sta VERA_DAT
     
     clc
@@ -249,8 +258,6 @@ println:
 .CODE
 .endproc
 
-;x=item
-;y: 1 = over, 1 = out
 ;------------------------------------------------------------------------------
 ; Function......: screen_set_item_color
 ; Purpose.......: Changes color of vertical band at left side of item
@@ -289,11 +296,11 @@ high:
     beq mouse_out
 
 mouse_over:
-    lda #64
+    lda #75
     bra set_color
 
 mouse_out:
-    lda #80
+    lda #91
 
 set_color:
     sta VERA_DAT
@@ -353,3 +360,8 @@ set_color:
 :   lda #94
     rts
 .endproc
+
+.segment "GOLDENRAM"
+    screen_header_flash_row: .res 1
+.CODE
+
