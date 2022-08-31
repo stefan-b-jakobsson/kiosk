@@ -5,11 +5,16 @@
 ; Output........: None
 ;------------------------------------------------------------------------------
 .proc message_init
+    jsr message_from_file
+    
     ;Setup pointer to start of text
-    lda #<message_text
+    lda #$00
     sta message_pointer
-    lda #>message_text
+    lda #$a0
     sta message_pointer+1
+
+    lda #$01        ;Select RAM bank 1
+    sta $00
     
     ;Init delay counter
     lda #2
@@ -20,6 +25,84 @@
     stz message_hold_arm
 
     rts
+.endproc
+
+;------------------------------------------------------------------------------
+; Function......: message_from_file
+; Purpose.......: Reads text message from file into RAM buffer
+; Input.........: None
+; Output........: None
+;------------------------------------------------------------------------------
+.proc message_from_file
+    ;Setup pointer to start of RAM
+    lda #$00
+    sta message_pointer
+    lda #$a0
+    sta message_pointer+1
+
+    lda #$01        ;Select RAM bank 1
+    sta $00
+    
+    ;Copy file name to RAM
+    ldy #0
+:   lda fname,y
+    beq :+
+    sta file_buffer,y
+    iny
+    bra :-
+
+    ;Open file
+:   tya
+    ldx #<file_buffer
+    ldy #>file_buffer
+    jsr SETNAM
+
+    lda #1
+    ldx #8
+    ldy #0
+    jsr SETLFS
+
+    lda #1
+    jsr OPEN
+
+    ldx #1
+    jsr CHKIN
+    
+    ;Read file content
+    stz st
+loop:
+    lda st
+    bne eof
+    jsr CHRIN
+    sta char
+    jsr READST
+    sta st
+    and #255-64
+    bne eof
+    lda char
+    sta (message_pointer)
+    inc message_pointer
+    bne loop
+    inc message_pointer+1
+    bra loop
+
+eof:
+    lda #0
+    sta (message_pointer)
+
+close:
+    lda #1
+    jsr CLOSE
+    jsr CLRCHN
+    rts
+
+    fname:
+        .byt "kioskmsg.txt",0
+    
+    .segment "GOLDENRAM"
+        st: .res 1
+        char: .res 1
+    .CODE
 .endproc
 
 ;------------------------------------------------------------------------------
@@ -86,8 +169,9 @@
     ;At character boundary?
     lda message_curchar+7
     bne :+
+    
     jsr message_fetch_char
-    cmp #$ff            ;Hold control char?
+    cmp #104            ;Hold control char?
     bne :+
     jsr message_fetch_char
     lda #53             ;Hold will start after 50 invokations
@@ -107,7 +191,7 @@ loop:
     bcc :+
     lda #97                 ;97 = White foreground + blue background (active state)
     bra :++
-:   lda #107                ;107 = Dark grey foreground + blue background (inactive state)
+:   lda #96+11              ;Dark grey foreground + blue background (inactive state)
 :   sta VERA_DAT
     inx                     ;Next line
     cpx #7                  ;Are we done?
@@ -167,23 +251,15 @@ loop:
     rts
 
 wraparound:
-    lda #<message_text
+    lda #$00
     sta message_pointer
-    lda #>message_text
+    lda #$a0
     sta message_pointer+1
     bra message_fetch_char
 .endproc
 
 message_pointer = $28
 message_charpointer = $2a
-
-message_text:
-    .byt "               "
-    .byt "proudly presenting the commander x16 here ", $ff, "@vcf mw17               "
-    .byt "after being in development since 2019, the hardware is now close to finished                "
-    .byt "some of the already available games and demos have been gathered for you to try out                "
-    .byt "follow us at www.commanderx16.com               "
-    .byt "and have a nice day!                               ", 0
 
 .segment "GOLDENRAM"
     message_curchar: .res 8

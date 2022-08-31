@@ -71,6 +71,23 @@ main_loop:
     lda #0
     jsr MOUSE_CONFIG
 
+    ;Clear keyboard buffer
+    sei
+:   jsr GETIN
+    bne :-
+
+    ;Insert RUN<CR> into keyboard buffer
+    lda #'r'
+    jsr KBDBUF_PUT
+    lda #'u'
+    jsr KBDBUF_PUT
+    lda #'n'
+    jsr KBDBUF_PUT
+    lda #13
+    jsr KBDBUF_PUT
+    
+    cli
+
     ;Exit to basic
     rts
 

@@ -240,23 +240,6 @@ run:
 
     lda #0
     jsr CLOSE
-
-    ;Clear keyboard buffer
-    sei
-:   jsr GETIN
-    bne :-
-
-    ;Insert RUN<CR> into keyboard buffer
-    lda #'r'
-    jsr KBDBUF_PUT
-    lda #'u'
-    jsr KBDBUF_PUT
-    lda #'n'
-    jsr KBDBUF_PUT
-    lda #13
-    jsr KBDBUF_PUT
-    
-    cli
     
     inc exitflag            ;Set exitflag to exit from main loop
     
