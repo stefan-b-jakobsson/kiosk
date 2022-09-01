@@ -80,8 +80,12 @@ loop:
     and #255-64
     bne eof
     lda char
+    cmp #10             ;Ignore LF
+    beq :+
+    cmp #13             ;Ignore CR
+    beq :+
     sta (message_pointer)
-    inc message_pointer
+:   inc message_pointer
     bne loop
     inc message_pointer+1
     bra loop

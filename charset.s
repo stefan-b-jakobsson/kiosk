@@ -598,7 +598,7 @@ charset_def:
     .byt 3
 
 
-    ;59: Semi colon
+    ;59: Semicolon
     .byt %00000000
     .byt %00000000
     .byt %11000000
