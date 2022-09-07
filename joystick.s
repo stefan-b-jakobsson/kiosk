@@ -5,7 +5,7 @@
 ; Output........: None
 ;------------------------------------------------------------------------------
 .proc joystick_init
-    ;Set values
+    ;Set values   
     lda #$ff
     sta joystick_cur_index
     sta joystick_old_index
@@ -117,7 +117,7 @@ left:
 :   jsr mouse_unselect
 
     ldx joystick_cur_index
-    cmp #$ff
+    cpx #$ff
     bne :+
     ldx #0
     stx joystick_cur_index
@@ -232,9 +232,9 @@ update_old_state:
 ;------------------------------------------------------------------------------
 .proc joystick_unselect
     ldx joystick_cur_index
+    stx joystick_old_index
     cpx #$ff
     beq :+
-    stx joystick_old_index
     ldy #0
     jsr screen_set_item_color
     ldx #$ff
