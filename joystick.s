@@ -232,9 +232,9 @@ update_old_state:
 ;------------------------------------------------------------------------------
 .proc joystick_unselect
     ldx joystick_cur_index
-    stx joystick_old_index
     cpx #$ff
     beq :+
+    stx joystick_old_index
     ldy #0
     jsr screen_set_item_color
     ldx #$ff
@@ -255,7 +255,6 @@ update_old_state:
     stx joystick_cur_index
     ldy #1
     jsr screen_set_item_color
-    
     ldx #$ff
     stx joystick_old_index              ;Clear old index
 :   rts
